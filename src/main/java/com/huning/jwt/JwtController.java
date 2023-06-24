@@ -18,7 +18,7 @@ import java.time.Duration;
 
 @RestController
 @RequiredArgsConstructor
-public class HomController {
+public class JwtController {
 
 	private final JwtTokenizer jwtTokenizer;
 
