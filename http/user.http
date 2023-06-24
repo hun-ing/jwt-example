@@ -1,0 +1,30 @@
+### 회원가입
+POST http://localhost:8080/user
+Content-Type: application/json
+
+{
+  "account":"huning",
+  "password":"huning",
+  "nickname":"훈잉",
+  "phone":"010-0000-0000",
+  "crn":"123-45-67890"
+}
+
+### 회원 정보
+GET http://localhost:8080/user
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+### 회원 탈퇴
+DELETE http://localhost:8080/user
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+client.global.set("accessToken", '');
+client.global.set("refreshToken", '');
+%}

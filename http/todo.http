@@ -1,0 +1,52 @@
+### Todo 추가
+POST http://localhost:8080/todo
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "my todo",
+  "description": "my todo contents"
+}
+
+
+
+### Todo 목록
+### size : 가져올 Todo 수
+### state : ALL, COMPLETE, INCOMPLETE
+### lastTodoId : 무한 스크롤을 위한 가장 마지막 Todo의 id 값, 최초 조회 시 -1, 이후 스크롤 감지로 마지막 Todo의 id값을 보내준다.
+GET http://localhost:8080/todo?size=3&state=ALL&lastTodoId=-1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+
+
+### Todo 상세 정보 조회
+GET http://localhost:8080/todo/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+> {%
+client.global.set("todoId", response.body.todoId);
+client.log("todoId: "+client.global.get("todoId"));
+%}
+
+
+### Todo 수정
+### StateType : ALL, COMPLETE, INCOMPLETE
+PUT http://localhost:8080/todo/
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "todoId": {{todoId}},
+  "name": "my todo 완료",
+  "description": "my todo 완료",
+  "state": "COMPLETE"
+}
+
+
+
+### Todo 삭제
+DELETE http://localhost:8080/todo?todoId=1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}

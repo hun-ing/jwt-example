@@ -1,0 +1,11 @@
+### 계정 중복 체크
+GET http://localhost:8080/verify/account?account=test@mail.com
+Content-Type: application/json
+
+### 사업자등록번호 체크
+GET http://localhost:8080/verify/crn?crn=123-45-67890
+Content-Type: application/json
+
+### 닉네임 중복 체크
+GET http://localhost:8080/verify/nickname?nickname=후니
+Content-Type: application/json

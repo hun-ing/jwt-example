@@ -1,0 +1,36 @@
+### 로그인
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "account":"huning",
+  "password":"huning"
+}
+
+> {%
+client.global.set("accessToken", response.body.accessToken);
+client.global.set("refreshToken", response.headers.valueOf("Set-Cookie").split(";")[0].split("=")[1]);
+client.log("accessToken: "+client.global.get("accessToken"));
+client.log("refreshToken: "+client.global.get("refreshToken"));
+%}
+
+### 로그아웃
+POST http://localhost:8080/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Cookie: RefreshToken={{refreshToken}}
+
+> {%
+client.global.set("accessToken", '');
+client.global.set("refreshToken", '');
+%}
+
+### 토큰 재발급
+GET http://localhost:8080/auth/token
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+Cookie: RefreshToken={{refreshToken}}
+
+> {%
+client.global.set("accessToken", response.body.accessToken);
+%}
