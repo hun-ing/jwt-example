@@ -22,4 +22,8 @@ public class AccountService {
 	public AccountLogin findByAccountId(Long accountId) {
 		return accountRepository.findByAccountId(accountId);
 	}
+
+	public void deleteAccount(Long accountId) {
+		accountRepository.deleteAccount(accountId);
+	}
 }

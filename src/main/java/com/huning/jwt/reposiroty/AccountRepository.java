@@ -23,4 +23,8 @@ public class AccountRepository {
 	public AccountLogin findByAccountId(Long accountId) {
 		return accountTable.getAccount(accountId).orElseThrow(() -> new IllegalArgumentException("계정을 찾을 수 없습니다."));
 	}
+
+	public void deleteAccount(Long accountId) {
+		accountTable.deleteAccount(accountId);
+	}
 }

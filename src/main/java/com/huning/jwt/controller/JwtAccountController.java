@@ -5,6 +5,7 @@ import com.huning.jwt.common.util.JwtTokenizer;
 import com.huning.jwt.common.util.Verify;
 import com.huning.jwt.dto.AccountLogin;
 import com.huning.jwt.service.AccountService;
+import com.huning.jwt.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class JwtAccountController {
 
 	private final JwtTokenizer jwtTokenizer;
 	private final AccountService accountService;
+	private final RefreshTokenService refreshTokenService;
 
 	@PostMapping
 	public ResponseEntity signup(@RequestBody AccountLogin accountLogin, BindingResult bindingResult) {
@@ -36,8 +38,15 @@ public class JwtAccountController {
 	}
 
 	@GetMapping
-	public ResponseEntity account(@Verify AccountDetail accountDetail) {
+	public ResponseEntity getAccount(@Verify AccountDetail accountDetail) {
 		AccountLogin accountLogin = accountService.findByAccountId(accountDetail.getAccountId());
 		return new ResponseEntity(accountLogin, HttpStatus.OK);
+	}
+
+	@DeleteMapping
+	public ResponseEntity deleteAccount(@Verify AccountDetail accountDetail) {
+		accountService.deleteAccount(accountDetail.getAccountId());
+		refreshTokenService.deleteRefreshToken(accountDetail.getAccountId());
+		return new ResponseEntity(HttpStatus.OK);
 	}
 }

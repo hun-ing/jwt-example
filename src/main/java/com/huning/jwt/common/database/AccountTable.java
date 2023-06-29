@@ -26,4 +26,8 @@ public class AccountTable {
 	public Optional<AccountLogin> getAccountByAccount(String account) {
 		return accounts.values().stream().filter(accountLogin -> account.equals(accountLogin.getAccount())).findFirst();
 	}
+
+	public void deleteAccount(Long accountId) {
+		accounts.remove(accountId);
+	}
 }
