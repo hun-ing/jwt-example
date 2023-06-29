@@ -16,11 +16,11 @@ public class AccountRepository {
 		return accountTable.setAccount(accountLogin);
 	}
 
-	public AccountLogin getAccount(Long accountId) {
-		return accountTable.getAccount(accountId);
-	}
-
 	public AccountLogin getAccountByAccount(String account) {
 		return accountTable.getAccountByAccount(account).orElseThrow(() -> new UsernameNotFoundException("해당 계정을 찾을 수 없습니다."));
+	}
+
+	public AccountLogin findByAccountId(Long accountId) {
+		return accountTable.getAccount(accountId).orElseThrow(() -> new IllegalArgumentException("계정을 찾을 수 없습니다."));
 	}
 }

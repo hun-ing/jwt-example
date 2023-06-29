@@ -13,8 +13,8 @@ public class AccountTable {
 	private Long accountIdCount = 0L;
 	private Map<Long, AccountLogin> accounts = new ConcurrentHashMap<>();
 
-	public AccountLogin getAccount(Long accountId) {
-		return accounts.get(accountId);
+	public Optional<AccountLogin> getAccount(Long accountId) {
+		return Optional.ofNullable(accounts.get(accountId));
 	}
 
 	public Long setAccount(AccountLogin accountLogin) {

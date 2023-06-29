@@ -20,10 +20,10 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		JwtAuthenticationToken authenticationToken = (JwtAuthenticationToken) authentication;
 		Claims claims = jwtTokenizer.parseAccessToken(authenticationToken.getToken());
-		Long userId = claims.get("userId", Long.class);
+		Long accountId = claims.get("accountId", Long.class);
 
 		AccountDetail loginInfo = new AccountDetail();
-		loginInfo.setUserId(userId);
+		loginInfo.setAccountId(accountId);
 
 		return new JwtAuthenticationToken(loginInfo);
 	}

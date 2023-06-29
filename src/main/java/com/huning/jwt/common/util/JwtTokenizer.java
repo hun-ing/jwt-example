@@ -24,21 +24,21 @@ public class JwtTokenizer {
 	/**
 	 * AccessToken 생성
 	 */
-	public String createAccessToken(Long userId) {
-		return createToken(userId, ACCESS_TOKEN_EXPIRE_COUNT, appConfig.getJwtUtil().getJwtKey());
+	public String createAccessToken(Long accountId) {
+		return createToken(accountId, ACCESS_TOKEN_EXPIRE_COUNT, appConfig.getJwtUtil().getJwtKey());
 	}
 
 	/**
 	 * RefreshToken 생성
 	 */
-	public String createRefreshToken(Long userId) {
-		return createToken(userId, REFRESH_TOKEN_EXPIRE_COUNT, appConfig.getJwtUtil().getJwtKey());
+	public String createRefreshToken(Long accountId) {
+		return createToken(accountId, REFRESH_TOKEN_EXPIRE_COUNT, appConfig.getJwtUtil().getJwtKey());
 	}
 
 
-	private String createToken(Long userId, Long expire, byte[] secretKey) {
+	private String createToken(Long accountId, Long expire, byte[] secretKey) {
 		Claims claims = Jwts.claims();
-		claims.put("userId", userId);
+		claims.put("accountId", accountId);
 		return Jwts.builder()
 						.setClaims(claims)
 						.setIssuedAt(new Date())
@@ -50,11 +50,11 @@ public class JwtTokenizer {
 	/**
 	 * 토큰에서 유저 아이디 얻기
 	 */
-	public Long getUserIdFromToken(String token) {
+	public Long getAccountIdFromToken(String token) {
 		String[] tokenArr = token.split(" ");
 		token = tokenArr[1];
 		Claims claims = parseToken(token, appConfig.getJwtUtil().getJwtKey());
-		return Long.valueOf((Integer) claims.get("userId"));
+		return Long.valueOf((Integer) claims.get("accountId"));
 	}
 
 	public Claims parseAccessToken(String accessToken) {

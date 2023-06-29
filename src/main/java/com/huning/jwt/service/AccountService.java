@@ -18,4 +18,8 @@ public class AccountService {
 	public AccountLogin getAccountByAccount(String account) {
 		return accountRepository.getAccountByAccount(account);
 	}
+
+	public AccountLogin findByAccountId(Long accountId) {
+		return accountRepository.findByAccountId(accountId);
+	}
 }

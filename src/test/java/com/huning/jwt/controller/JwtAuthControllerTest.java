@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huning.jwt.common.util.JwtTokenizer;
 import com.huning.jwt.domain.AccessToken;
 import com.huning.jwt.dto.AccountLogin;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -99,8 +99,9 @@ class JwtAuthControllerTest {
 						.getContentAsString();
 
 		// then
-		Assertions.assertDoesNotThrow(() -> {
-			AccessToken accessToken = objectMapper.readValue(contentAsString, AccessToken.class);
+
+		assertThatCode(() -> {
+			objectMapper.readValue(contentAsString, AccessToken.class);
 		});
 	}
 
@@ -126,7 +127,7 @@ class JwtAuthControllerTest {
 						.getContentAsString();
 
 		// then
-		Assertions.assertDoesNotThrow(() -> {
+		assertThatCode(() -> {
 			AccessToken accessToken = objectMapper.readValue(contentAsString, AccessToken.class);
 			jwtTokenizer.parseAccessToken(accessToken.getAccessToken());
 		});

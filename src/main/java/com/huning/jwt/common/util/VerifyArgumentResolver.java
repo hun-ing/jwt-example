@@ -39,7 +39,7 @@ public class VerifyArgumentResolver implements HandlerMethodArgumentResolver {
 			return null;
 
 		AccountDetail accountPrincipal = (AccountDetail) principal;
-		accountDetail.setUserId(accountPrincipal.getUserId());
+		accountDetail.setAccountId(accountPrincipal.getAccountId());
 
 		return accountDetail;
 	}
