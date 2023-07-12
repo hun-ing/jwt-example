@@ -37,8 +37,10 @@ public class JwtTokenizer {
 
 
 	private String createToken(Long accountId, Long expire, byte[] secretKey) {
+		long uniqueValue = System.currentTimeMillis();
 		Claims claims = Jwts.claims();
 		claims.put("accountId", accountId);
+		claims.put("uniqueValue", uniqueValue);
 		return Jwts.builder()
 						.setClaims(claims)
 						.setIssuedAt(new Date())

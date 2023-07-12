@@ -1,13 +1,10 @@
 ### 회원가입
-POST http://localhost:8080/user
+POST http://localhost:8080/account
 Content-Type: application/json
 
 {
-  "account":"huning",
-  "password":"huning",
-  "nickname":"훈잉",
-  "phone":"010-0000-0000",
-  "crn":"123-45-67890"
+  "account":"huning@gmail.com",
+  "password":"1234"
 }
 
 ### 회원 정보

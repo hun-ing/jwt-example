@@ -4,14 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huning.jwt.common.util.JwtTokenizer;
 import com.huning.jwt.domain.AccessToken;
 import com.huning.jwt.dto.AccountLogin;
+import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.util.StringUtils;
 
+import javax.servlet.http.Cookie;
+
+import java.util.Date;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -131,5 +140,110 @@ class JwtAuthControllerTest {
 			AccessToken accessToken = objectMapper.readValue(contentAsString, AccessToken.class);
 			jwtTokenizer.parseAccessToken(accessToken.getAccessToken());
 		});
+	}
+
+	@Test
+	@DisplayName("로그인 성공 시 쿠키에 RefreshToken 값이 저장되었는지 확인한다.")
+	void test4() throws Exception {
+		// given
+		AccountLogin login = AccountLogin.builder()
+						.account("huning@gmail.com")
+						.password("1234")
+						.build();
+
+		String json = objectMapper.writeValueAsString(login);
+
+		// when
+		mockMvc.perform(post("/auth/login")
+										.contentType(APPLICATION_JSON)
+										.content(json))
+						.andExpect(status().isOk())
+						.andExpect(MockMvcResultMatchers.cookie().exists("RefreshToken"))
+						.andExpect(result -> {
+							String cookieValue = result.getResponse().getCookie("RefreshToken").getValue();
+							boolean isNotEmpty = StringUtils.hasText(cookieValue);
+							if (!isNotEmpty) {
+								throw new AssertionError("Cookie 'RefreshToken' is empty");
+							}
+						})
+						.andDo(print());
+	}
+
+	@Test
+	@DisplayName("RefreshToken으로 accessToken을 재발급 받는다.")
+	void test5() throws Exception {
+		// given
+		AccountLogin login = AccountLogin.builder()
+						.account("huning@gmail.com")
+						.password("1234")
+						.build();
+
+		String json = objectMapper.writeValueAsString(login);
+
+		// when
+		MockHttpServletResponse response1 = mockMvc.perform(post("/auth/login")
+										.contentType(APPLICATION_JSON)
+										.content(json))
+						.andExpect(status().isOk())
+						.andDo(print())
+						.andReturn().getResponse();
+
+
+		Cookie refreshToken = response1.getCookie("RefreshToken");
+		String contentAsString1 = response1.getContentAsString();
+		AccessToken accessToken1 = objectMapper.readValue(contentAsString1, AccessToken.class);
+
+		MockHttpServletResponse response2 = mockMvc.perform(post("/auth/token")
+										.contentType(APPLICATION_JSON)
+										.header("Authorization", "Bearer " + accessToken1.getAccessToken())
+										.cookie(refreshToken))
+						.andExpect(status().isOk())
+						.andDo(print())
+						.andReturn().getResponse();
+
+		String contentAsString2 = response2.getContentAsString();
+		AccessToken accessToken2 = objectMapper.readValue(contentAsString2, AccessToken.class);
+
+		// then
+		assertThat(accessToken1.getAccessToken()).isNotEqualTo(accessToken2.getAccessToken());
+	}
+
+	@Test
+	@DisplayName("토큰 생성 시 토큰의 값이 달라진다.")
+	void test6() throws Exception {
+		String accessToken1 = jwtTokenizer.createAccessToken(1L);
+
+		Thread.sleep(100);
+
+		String accessToken2 = jwtTokenizer.createAccessToken(1L);
+
+		assertThat(accessToken1).isNotEqualTo(accessToken2);
+	}
+
+	@Test
+	@DisplayName("토큰의 페이로드가 같을 때 시간차 없이 연속 생성 시 동일한 토큰 값이 발행된다.")
+	void test7() throws Exception {
+		String accessToken1 = jwtTokenizer.createAccessToken(1L);
+		String accessToken2 = jwtTokenizer.createAccessToken(1L);
+
+		Claims claims1 = jwtTokenizer.parseAccessToken(accessToken1);
+		Claims claims2 = jwtTokenizer.parseAccessToken(accessToken2);
+
+		Date issuedAt1 = claims1.getIssuedAt();
+		Date issuedAt2 = claims2.getIssuedAt();
+
+		System.out.println("issuedAt1 = " + issuedAt1);
+		System.out.println("issuedAt2 = " + issuedAt2);
+
+		assertThat(issuedAt1).isEqualTo(issuedAt2);
+	}
+
+	@Test
+	@DisplayName("토큰 생성 시 유니크한 값을 넣어주면 연속적으로 토큰을 발행해도 같은 토큰이 발행되지 않는다.")
+	void test8() throws Exception {
+		String accessToken1 = jwtTokenizer.createAccessToken(1L);
+		String accessToken2 = jwtTokenizer.createAccessToken(1L);
+
+		assertThat(accessToken1).isNotEqualTo(accessToken2);
 	}
 }

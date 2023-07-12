@@ -32,8 +32,6 @@ public class JwtAccountController {
 
 		accountLogin.setAccountId(accountId);
 
-		System.out.println("accountId = " + accountId);
-
 		return ResponseEntity.status(HttpStatus.CREATED).body(accountLogin);
 	}
 
