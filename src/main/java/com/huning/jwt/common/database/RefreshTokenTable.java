@@ -16,8 +16,8 @@ public class RefreshTokenTable {
 		refreshTokens.put(accountId, refreshToken);
 	}
 
-	public void deleteRefreshToken(Long accountId) {
-		refreshTokens.remove(accountId);
+	public void deleteRefreshToken(String refreshToken) {
+		refreshTokens.values().removeIf(item -> item.getRefreshToken().equals(refreshToken));
 	}
 
 	public Optional<RefreshToken> findRefreshToken(String refreshToken) {

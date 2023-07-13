@@ -61,6 +61,12 @@ public class JwtAuthController {
 						.body(accessTokenDto);
 	}
 
+	@PostMapping("/logout")
+	public ResponseEntity logout(@CookieValue("RefreshToken") String refreshToken) {
+		refreshTokenService.deleteRefreshToken(refreshToken);
+		return new ResponseEntity(HttpStatus.OK);
+	}
+
 	@PostMapping("/token")
 	public ResponseEntity renewToken(@CookieValue("RefreshToken") String refreshToken) {
 		RefreshToken findRefreshToken = refreshTokenService.findRefreshToken(refreshToken)

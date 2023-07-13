@@ -13,8 +13,8 @@ public class RefreshTokenRepository {
 
 	private final RefreshTokenTable refreshTokenTable;
 
-	public void deleteRefreshToken(Long accountId) {
-		refreshTokenTable.deleteRefreshToken(accountId);
+	public void deleteRefreshToken(String refreshToken) {
+		refreshTokenTable.deleteRefreshToken(refreshToken);
 	}
 
 	public void addRefreshToken(RefreshToken refreshTokenEntity) {

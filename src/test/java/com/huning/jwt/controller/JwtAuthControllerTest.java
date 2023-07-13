@@ -3,8 +3,9 @@ package com.huning.jwt.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huning.jwt.common.util.JwtTokenizer;
 import com.huning.jwt.domain.AccessToken;
+import com.huning.jwt.domain.RefreshToken;
 import com.huning.jwt.dto.AccountLogin;
-import io.jsonwebtoken.Claims;
+import com.huning.jwt.reposiroty.RefreshTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.Cookie;
 
-import java.util.Date;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -41,6 +42,9 @@ class JwtAuthControllerTest {
 
 	@Autowired
 	private JwtTokenizer jwtTokenizer;
+
+	@Autowired
+	private RefreshTokenRepository refreshTokenRepository;
 
 	private AccountLogin account;
 
@@ -212,38 +216,43 @@ class JwtAuthControllerTest {
 	@DisplayName("토큰 생성 시 토큰의 값이 달라진다.")
 	void test6() throws Exception {
 		String accessToken1 = jwtTokenizer.createAccessToken(1L);
-
-		Thread.sleep(100);
-
 		String accessToken2 = jwtTokenizer.createAccessToken(1L);
 
 		assertThat(accessToken1).isNotEqualTo(accessToken2);
 	}
 
 	@Test
-	@DisplayName("토큰의 페이로드가 같을 때 시간차 없이 연속 생성 시 동일한 토큰 값이 발행된다.")
+	@DisplayName("로그아웃 시 데이터 저장소에서 refresh token이 삭제된다.")
 	void test7() throws Exception {
-		String accessToken1 = jwtTokenizer.createAccessToken(1L);
-		String accessToken2 = jwtTokenizer.createAccessToken(1L);
+		// given
+		AccountLogin login = AccountLogin.builder()
+						.account("huning@gmail.com")
+						.password("1234")
+						.build();
 
-		Claims claims1 = jwtTokenizer.parseAccessToken(accessToken1);
-		Claims claims2 = jwtTokenizer.parseAccessToken(accessToken2);
+		String json = objectMapper.writeValueAsString(login);
 
-		Date issuedAt1 = claims1.getIssuedAt();
-		Date issuedAt2 = claims2.getIssuedAt();
+		// when
+		MockHttpServletResponse response1 = mockMvc.perform(post("/auth/login")
+										.contentType(APPLICATION_JSON)
+										.content(json))
+						.andExpect(status().isOk())
+						.andDo(print())
+						.andReturn().getResponse();
 
-		System.out.println("issuedAt1 = " + issuedAt1);
-		System.out.println("issuedAt2 = " + issuedAt2);
+		Cookie refreshToken = response1.getCookie("RefreshToken");
+		String contentAsString1 = response1.getContentAsString();
+		AccessToken accessToken1 = objectMapper.readValue(contentAsString1, AccessToken.class);
 
-		assertThat(issuedAt1).isEqualTo(issuedAt2);
-	}
+		mockMvc.perform(post("/auth/logout")
+										.contentType(APPLICATION_JSON)
+										.header("Authorization", "Bearer " + accessToken1.getAccessToken())
+										.cookie(refreshToken))
+						.andExpect(status().isOk())
+						.andDo(print());
 
-	@Test
-	@DisplayName("토큰 생성 시 유니크한 값을 넣어주면 연속적으로 토큰을 발행해도 같은 토큰이 발행되지 않는다.")
-	void test8() throws Exception {
-		String accessToken1 = jwtTokenizer.createAccessToken(1L);
-		String accessToken2 = jwtTokenizer.createAccessToken(1L);
-
-		assertThat(accessToken1).isNotEqualTo(accessToken2);
+		// then
+		Optional<RefreshToken> findRefreshToken2 = refreshTokenRepository.findRefreshToken(refreshToken.getValue());
+		assertThat(findRefreshToken2).isEmpty();
 	}
 }

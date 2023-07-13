@@ -23,15 +23,12 @@ public class JwtAccountController {
 
 	@PostMapping
 	public ResponseEntity signup(@RequestBody AccountLogin accountLogin, BindingResult bindingResult) {
-
 		if (bindingResult.hasErrors()) {
 			return new ResponseEntity(HttpStatus.BAD_REQUEST);
 		}
 
 		Long accountId = accountService.addAccount(accountLogin);
-
 		accountLogin.setAccountId(accountId);
-
 		return ResponseEntity.status(HttpStatus.CREATED).body(accountLogin);
 	}
 
@@ -42,9 +39,9 @@ public class JwtAccountController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity deleteAccount(@Verify AccountDetail accountDetail) {
+	public ResponseEntity deleteAccount(@Verify AccountDetail accountDetail, @CookieValue("RefreshToken") String refreshToken) {
 		accountService.deleteAccount(accountDetail.getAccountId());
-		refreshTokenService.deleteRefreshToken(accountDetail.getAccountId());
+		refreshTokenService.deleteRefreshToken(refreshToken);
 		return new ResponseEntity(HttpStatus.OK);
 	}
 }
